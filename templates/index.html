@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>To-Do App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+
+<div class="bg-white shadow-lg rounded-xl p-6 w-full max-w-md">
+
+    <h1 class="text-2xl font-bold text-center mb-4">✨ To-Do App</h1>
+
+    <!-- Add Task -->
+    <form action="/add" method="POST" class="flex gap-2 mb-4">
+        <input type="text" name="content" placeholder="Add a task..."
+               class="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400">
+        <button class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+            Add
+        </button>
+    </form>
+
+    <!-- Task List -->
+    <ul class="space-y-2">
+        {% for task in tasks %}
+        <li class="flex justify-between items-center p-2 bg-gray-50 rounded-lg shadow-sm">
+
+            <span class="{% if task.completed %}line-through text-gray-400{% endif %}">
+                {{ task.content }}
+            </span>
+
+            <div class="flex gap-2">
+                <a href="/complete/{{ task.id }}"
+                   class="text-green-500 hover:text-green-700">✔</a>
+
+                <a href="/delete/{{ task.id }}"
+                   class="text-red-500 hover:text-red-700">✖</a>
+            </div>
+
+        </li>
+        {% endfor %}
+    </ul>
+
+</div>
+
+</body>
+</html>
