@@ -1,14 +1,53 @@
 from flask import Flask, render_template, request, redirect, url_for
 import sqlite3
+import time
+from collections import defaultdict
 
-app = Flask(__name__)
+app = Flask(__name__)   # <-- MOVE THIS UP
+
+# Simple in-memory metrics
+metrics = {
+    "request_count": 0,
+    "error_count": 0,
+    "latency": []
+}
+
+@app.before_request
+def start_timer():
+    request.start_time = time.time()
+
+@app.after_request
+def record_metrics(response):
+    latency = time.time() - request.start_time
+
+    metrics["request_count"] += 1
+    metrics["latency"].append(latency)
+
+    if response.status_code >= 500:
+        metrics["error_count"] += 1
+
+    return response
+
+@app.route("/metrics")
+def get_metrics():
+    total = metrics["request_count"]
+    errors = metrics["error_count"]
+
+    avg_latency = sum(metrics["latency"]) / total if total else 0
+    error_rate = (errors / total) if total else 0
+
+    return {
+        "total_requests": total,
+        "error_count": errors,
+        "error_rate": error_rate,
+        "avg_latency_sec": avg_latency
+    }
 
 def get_db():
     conn = sqlite3.connect("todo.db")
     conn.row_factory = sqlite3.Row
     return conn
 
-# Create table if not exists
 def init_db():
     with get_db() as db:
         db.execute("""
